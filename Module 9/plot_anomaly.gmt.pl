@@ -1,0 +1,91 @@
+# plot_anomaly.pl
+# This script will plot a contour map of potential field (gravity/magnetic data).
+# To run this script type: perl <fi
+# The output file will be a .png image file and a .eps image file 
+# with the same basename as the datafile.
+ 
+ # The minmax GMT program will give the minmax values of each data column (useful!)
+use Carp; 
+print STDERR "$0: Running .....\n";
+
+sub open_or_die {
+	my ($mode, $filename) = @_;
+	open my $h, $mode, $filename
+		or croak "Could not open '$filename': $!";
+return $h;
+}
+
+################################
+my %C;
+my $conf = open_or_die("<", "plot_anomaly.conf");
+my $key;
+my $value;
+while (<$conf>) {
+  unless ($_ =~ /^#/ || $_ =~ /^\n/) {
+  	my ($key, $value) = split "=",$_;
+  	chomp($value);
+	  $C{$key} = $value;
+  }
+}
+
+###############################
+$in = $C{INPUT_FILE};
+$out = "$in.eps";
+$overlay = "$in.overlay.eps";
+#############################
+
+$west = $C{WEST};
+$east = $C{EAST};
+$south = $C{SOUTH};
+$north = $C{NORTH};
+$grid = $C{GRID_SPACING};
+$tick_int = $C{TICK_INTERVAL};
+$map_scale = $C{MAP_SCALE};
+$tick = "a".$tick_int."f".$tick_int/2;
+
+$min = $C{MIN_DATA_VAL};
+$max = $C{MAX_DATA_VAL};
+$cint = $C{COLOR_INTERVAL};
+$color_file = $C{COLOR_SCALE};
+$xpos = $C{SCALE_BAR_X};
+$ypos = $C{SCALE_BAR_Y};
+$len = $C{SCALE_BAR_LENGTH};
+$width = $C{SCALE_BAR_WIDTH};
+$orient = $C{SCALE_BAR_ORIENTATION};
+$units = $C{SCALE_BAR_UNITS};
+# Scale bar annotation interval (10 x's the color interval)
+# Adjust so that the numbers do not overlap.
+$scale_anot_int = $cint*2;
+# This generates code for the tick placement.
+$scale_str = "a"."$scale_anot_int";
+$Tx = $West;
+$Ty = $South;
+$Lx = $West;
+$Ly = $South;
+$Llat = $South ;
+$Lscale = 1;
+##################################
+
+#`blockmean $in -R$west/$east/$south/$north -I$grid -V >surf.in`;
+#`surface surf.in -I$grid -R -Gsurf.grd -V`;
+`makecpt -C$color_file -T$min/$max/$cint -V > map.cpt`;
+#`gmt grd2cpt $in -C$color_file -V >map.cpt`;
+`gmt psbasemap --MAP_FRAME_TYPE=plain --FONT_ANNOT_PRIMARY=8p -Jm1:$map_scale -R$west/$east/$south/$north -X1i -Y1i -B$tick:'':/$tick:'':/WSne -K -V > $out`;
+
+#`psmask $in -I2 -Jm -R -K -O -V >> $out`;
+`gmt grdimage $in -Jm -R -Cmap.cpt -E300  -K -V -O >> $out`;
+`gmt grdcontour $in -Jm -R -L$min/$max -A- -Cmap.cpt -Wthinnest,100 -O -K >> $out`;
+#`psxy $in -R -Jm -Sp -Wthinnest,250 -V -O -K >> $out`;
+#`psmask -C -O -K >> $out`;
+# -T$Tx/$Ty/1c -L$Lx/$Ly/$Llat/$Lscale  -N1/2,175  
+#`gmt pscoast -Q -O -K >>$out`;
+`gmt pscoast --FONT_TITLE=10 --FONT_ANNOT_PRIMARY=23 --FONT_TITLE=8 --MAP_ANNOT_OFFSET_PRIMARY=-0.1c -R -Jm -S230 -W1p,230 -Df+  -Ia/1,255 -t30 -V -O -K >> $out`;
+`gmt psscale --FONT_TITLE=8p --FONT_LABEL=7p --FONT_ANNOT_PRIMARY=7p -D$xpos/$ypos/$len/$width$orient -Cmap.cpt -B$scale_str/:$units: -O -V >> $out`;
+`gmt grdimage $in -Jm -R -Cmap.cpt -E300 -V -P > $overlay`;
+`gmt ps2raster $out -A -P -Tf`;
+`gmt ps2raster $overlay -A -P -Tg`;
+`rm $out`;
+`rm $overlay`;
+
+
+
