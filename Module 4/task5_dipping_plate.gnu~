@@ -1,0 +1,56 @@
+#this file plots a function using gnuplot. Typically to run,
+# type: gnuplot change_in_radius_with_lat.gnu
+# on the command line
+reset
+
+set termoption dash
+
+# inputs:
+#     dip of plate (radians)
+#     depth to the top of the plate (m)
+#     plate thickness (m)
+#     vertical length of plate (m)
+#     horizontal position of the gravity station relative to the plate center (m)
+#     density contrast between plate and surrounding rock (m)
+# output:
+#      gravity anomaly (mgal)
+##########################################################################
+pi = 3.14159265358979;
+alpha = pi/2; # dip of the plate in radians
+z = 10000; #depth to top of plate (m)
+h = 5000; #plate thickness (m)
+l = 3000;  #vertical length of plate (m)
+del_density = 500; #input the density contrast (kg/m3)
+big_G = 6.67e-11; #gravitational const.
+to_mgal = 1e5; #convert SI to mGal
+
+term1(x) = log10(((z+l*sin(alpha))**2 + (x+l*cos(alpha))**2)/(x**2 + z**2));
+term2(x) = atan2(z*sin(alpha) +l + x*cos(alpha),x*sin(alpha) - z*cos(alpha));
+term3(x) = atan2(z*sin(alpha) + x*cos(alpha),x*sin(alpha) - z*cos(alpha));
+term4(x) = 0.5 * sin(alpha)  * term1(x) - cos(alpha) * (term2(x) - term3(x));
+
+grav(x) = 2.0 * to_mgal * big_G * del_density * h * term4(x);
+
+
+
+# Axes label
+set xlabel 'Horizontal distance from top plate edge (m)'
+set ylabel 'Gravity anomaly (mGal)'
+
+
+# Axes ranges
+set xrange [-2000:2000]
+set yrange [0:1]
+# Axes tics
+set xtics 500
+set ytics 0.1
+
+set style fill transparent solid 0.15
+set key Left
+
+
+plot  grav(x) with filledcurve y1=0  lt rgb "gray0" notitle
+	   
+set term pdf enhanced dashed
+set output "dipping_sheet_anomaly.pdf"
+replot

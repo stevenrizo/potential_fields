@@ -1,0 +1,23 @@
+#subroutine to calculate the gravity anomaly due to a finite plate
+
+# input to the subroutine is (first) plate length (m)  
+#       Note: plate length extends in positive direction from x=0
+# (second) plate depth (m), 
+# (third) horizontal location (calculation point) from x = 0
+# (fourth) density constrast (kg/m3)
+# this subroutine returns the gravity anomaly (mGal)
+
+
+my $pi = 3.14159265358979;
+my $l = 100000; #input length of plate (m)
+my $z = 1; #input the depth of the plate (m)
+my $h = 1000; #plate thickness (m)
+my $x = 100000; #input the horizontal distance of the 
+              #location of the gravity observation (m)
+my $del_density = -1700; #input the density contrast (kg/m3)
+
+my $big_G = 6.67e-11; #gravitational const.
+my $to_mgal = 1e5; #convert SI to mGal
+my $grav = 2.0 * $to_mgal * $big_G * $del_density * $h * ($pi + atan2($x,$z) + atan2(($l-$x),$z));
+my $grav = $grav - 2.0 * $to_mgal * $big_G * $del_density * $h * $pi;
+return $grav;

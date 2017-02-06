@@ -1,0 +1,38 @@
+reset
+
+set termoption dash
+
+pi = 3.14159265358979;
+
+z = 1; #depth to top of plate (m)
+h = 20; #plate thickness (m)
+l = 1000;  #vertical length of plate (m)
+del_density = 600; #input the density cotrast (kg/m3)
+big_G = 6.67e-11; #gravitational const.
+to_mgal = 1e5; #convert SI to mGal
+
+
+my $grav = 2.0 * to_mgal * big_G * del_density * h * log10(((z+l)**2 + x**2)/(x**2 + z**2));
+
+
+# Axes label
+set xlabel 'Horizontal distance from plate center (m)'
+set ylabel 'Gravity anomaly (mGal)'
+
+
+# Axes ranges
+set xrange [-2000:2000]
+set yrange [-100:100]
+# Axes tics
+set xtics 500
+set ytics 20
+
+set style fill transparent solid 0.15
+set key Left
+
+
+plot  "vertical_sheet.dat" using 1:2 with filledcurve y1=0  lt rgb "gray0" notitle
+	   
+set term pdf enhanced dashed
+set output "vertical_sheet_anomaly.pdf"
+replot

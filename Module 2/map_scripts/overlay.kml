@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- overlay.kml -->
+
+<!-- Note: This is a Comment within KML code, same as html
+This file requires a ground overlay file named between <href></href> tags
+and the boundaries of that file, in degrees, between 
+<north>,<south>,<east>,<west> tags (see below).
+Names and comments can be typed between <name></name> 
+and <description></description> tags (see below).
+-->
+
+<kml xmlns="http://www.opengis.net/kml/2.2">
+<Folder>
+<name>Gravity Anomaly</name>
+<description></description>
+<GroundOverlay>
+<name>Gravity anomaly overlay on terrain</name>
+<description>Map extent: west = 0, east = 0, south = 0, north = 0</description>
+<Icon>
+<href>overlay.png</href>
+</Icon>
+<LatLonBox>
+<north>42</north>
+<south>41.3</south>
+<east>-121.3</east>
+<west>-122</west>
+<rotation>0</rotation>
+</LatLonBox>
+</GroundOverlay>
+</Folder>
+</kml>

@@ -1,0 +1,36 @@
+#this file plots a function using gnuplot. Typically to run,
+# type: gnuplot change_in_radius_with_lat.gnu
+# on the command line
+reset
+
+set termoption dash
+
+G = 6.67e-11
+
+pi = 3.14159265358979
+
+to_mgal = 1e5; #convert SI to mGal
+
+l = 100000; #input length of plate (m)
+z = 1; #input the depth of the plate (m)
+h = 1000; #plate thickness (m)
+del_density = -1700; #input the density contrast (kg/m3)
+
+grav(x) = 2.0 * to_mgal * G * del_density * h * (pi + atan2(x,z) + atan2((l-x),z)) - 2.0 * to_mgal * G * del_density * h * pi
+
+# Axes label
+set xlabel 'Horizontal distance from left edge of plate (m)'
+set ylabel 'Gravity anomlay (mGal)'
+set size ratio -1
+# Axes ranges
+set xrange [-50000:50000]
+set yrange [-75:25]
+# Axes tics
+set xtics 25000
+set ytics 25
+set style fill transparent solid 0.15
+set key Left
+plot  grav(x) with filledcurve y1=0  lt rgb "gray0" notitle   
+set term pdf enhanced dashed
+set output "finite_plate_anomaly.pdf"
+replot
