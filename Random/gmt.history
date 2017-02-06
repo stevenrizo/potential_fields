@@ -1,0 +1,11 @@
+# GMT 5 Session common arguments shelf
+BEGIN GMT 5.1.0
+B	a20f10:mGal:/a72:Frequency:/WS
+J	X
+Jm	m1:2500000
+JX	X4i
+R	-261.83/-155.31/0/720
+X	1i
+Y	1i
+L	1
+END

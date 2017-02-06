@@ -1,0 +1,53 @@
+
+$in = "san_raf_mag_filtered.dat";
+$out = "mag_rtp13.eps";
+
+$plugL = "./geology/plug1.xyz";
+$condL = "./geology/plug1_base.xyz";
+$condS = "./geology/plug2_base.xyz";
+$sill = "./geology/sill_contact.xyz";
+
+
+#NLBM_conduit.F.wgs84z12.utm: N = 41165	<478881/481052>	<4264102/4266007>	<-1142.451/2470.655>	<1828/1872>
+$west = 479500;
+$east = 480900;
+$south = 4264100;
+$north = 4266000;
+
+$color_file = "haxby";
+$min_value = -100;
+$max_value = 500;
+$cint = 10;
+
+# grdcontour
+$anot_int = 20;
+$contours = 10;
+
+# psscale
+$xpos = 16.5;
+$ypos = 8.4;
+$len = 8;
+$width = .25;
+$orient = "v";
+$scale_anot_int = 50;
+
+system "gmt surface $in -I5 -Gsurf.grd -R$west/$east/$south/$north -V";
+system "gmt grdfft surf.grd -Gfiltered.grd -C10 -V";
+system "gmt grdredpol filtered.grd -Grtp.grd -C13/50 -V";
+system "gmt makecpt -C$color_file -T$min_value/$max_value/$cint -V > map.cpt";
+
+#system "psmask $in_file -I8 -X3 -Jx.035 -Ba100f25:'Easting (m)':/a100f25:'Northing (m)':/WSne -R -K > $out_file";
+system "gmt grdimage rtp.grd -Jx1:12000 -Cmap.cpt -Ba400f50:'':/a200f50:'':/WSne -K -V > $out";
+system "gmt grdcontour rtp.grd -R -Jx -C$contours -W0.25p,100 -O -K >> $out";
+system "gmt psxy  $in -R -Jx -Sp -W0.5p,255 -V -O -K >> $out";
+system "gmt psxy  $in -R -Jx -Sp -W0.5p,255 -O -K -V >> $out";
+system "gmt psxy  $condL -R -Jx -N -Sc.02i -W1p -O -K -V >> $out";
+system "gmt psxy  $condS -R -Jx -N -Sc.02i -W1p -O -K -V >> $out";
+system "gmt psxy  $plugL -R -Jx -N -Sc.02i -W1p -O -K -V >> $out";
+system "gmt psxy  $sill -R -Jx -Sc.02i -W1p -O -K -V >> $out";
+
+system "psscale -D$xpos/$ypos/$len/$width$orient -Cmap.cpt -B$scale_anot_int:'Magnetic Anomaly':/:nT: -O -V >> $out";
+#system "rm map.cpt surf.grd";
+system "gmt ps2raster $out -A -P -Tg";
+system "rm $out";
+

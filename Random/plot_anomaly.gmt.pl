@@ -1,0 +1,81 @@
+# plot_anomaly.pl
+# This script will plot a contour map of potential field (gravity/magnetic data).
+# To run this script type: perl <filename>.pl <datafile>
+# The output file will be a .png image file and a .eps image file 
+# with the same basename as the datafile.
+ 
+ # The minmax GMT program will give the minmax values of each data column (useful!)
+# minmax gravity_data_123W-121W_41N-43N.csv.parse.ll
+# gravity_data_123W-121W_41N-43N.csv.parse.ll: N = 5955	<-123.0009969/-121.0010884>	<41.0000549/42.99986>	<-182.88/-62.97>	<297.65/4020.97>
+
+$in = $ARGV[0];
+$out = "$in.eps";
+$overlay = "overlay.eps";
+#############################
+# EDIT these VALUES based on your DATA FILE
+#psbasemap (degrees)
+# West map boundary
+$west = -111.5;
+# East map boundary
+$east = -109.5;
+# South map boundary
+$south = 44;
+# North map boundary
+$north = 45;
+# Grid spacing for the map data 
+# Be careful, about units! Could be degrees or meters. 
+# Now, Units = degrees
+$grid = .004;
+# Tick interval
+# Annotate tick mark every one degree.
+$tick_int = 1;
+# Map scale = 1:2500000
+$map_scale = 2500000;
+# Not necessary to edit. This generates the correct code for the tick placement.
+$tick = "a".$tick_int."f".$tick_int/2;
+
+# makecpt (color scale)
+# Minimum color value to use
+$min = -270;
+# Maximum color value to use
+$max = -160;
+# Number of values per color interval (binned)
+$cint = 2;
+# Name of GMT color table
+$color_file = "haxby";
+
+# psscale
+# X Position of scale bar (from left side) 
+$xpos = 4.0;
+# Y Position of scale bar (from bottom)
+$ypos = -1.2;
+# Length of scale bar
+$len = 8;
+# Width of scale bar
+$width = .2;
+# Orientation of scale bar (h = horizontal, v = verticle)
+$orient = "h";
+# Data units
+$units = 'mGal';
+# Scale bar annotation interval (10 x's the color interval)
+# Adjust so that the numbers do not overlap.
+$scale_anot_int = $cint*10;
+# # Not necessary to edit. This generates the correct code for the tick placement.
+$scale_str = "a"."$scale_anot_int";
+##################################
+
+`gmt blockmean $in -R$west/$east/$south/$north -I$grid -V >surf.in`;
+`gmt surface surf.in -I$grid -R -Gsurf.grd -V`;
+`gmt makecpt -C$color_file -T$min/$max/$cint -V > map.cpt`;
+`gmt psbasemap --BASEMAP_TYPE=plain --FONT_ANNOT_PRIMARY=8p -Jm1:$map_scale -R -X1i -Y1i -B$tick:'':/$tick:'':/WSne -K -V > $out`;
+#`gmt psmask $in -I2 -Jm -R -K -O -V >> $out`;
+`gmt grdimage surf.grd -Jm -Cmap.cpt -E300  -K -V -O >> $out`;
+`gmt grdimage surf.grd -Jm -Cmap.cpt -E300 -V -P > $overlay`;
+`gmt grdcontour surf.grd -R -Jm -L$min/$max -A- -Cmap.cpt -Wthinnest,50 -O -K >> $out`;
+`gmt psxy $in -R -Jm -Sp -Wthinnest,250 -V -O -K >> $out`;
+#`gmt psmask -C -O -K >> $out`;
+`gmt psscale --FONT_TITLE=8p --FONT_LABEL=7p --FONT_ANNOT_PRIMARY=7p -D$xpos/$ypos/$len/$width$orient -Cmap.cpt -B$scale_str/:$units: -O -V >> $out`;
+`gmt ps2raster $out -A -P -Tg`;
+`gmt ps2raster $overlay -A -P -Tg`;
+`rm *.eps`;
+
