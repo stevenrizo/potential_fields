@@ -1,0 +1,76 @@
+Here are some TIPS for using the SCRIPTS in this directory:
+
+1) Gravity data can be downloaded from this website:
+http://irpsrvgis08.utep.edu/viewers/Flex/GravityMagnetic/GravityMagnetic_CyberShare/
+
+	* This link will open up a map entitled: Gravity and Magnetic extract utility.
+	* Type your area of interest in the Data Extract Box: Top = 43;  Bottom = 41;  Left = -123;  Right = -121
+	* Note:  Top refers to north, Bottom refers to South, Left refers refers to West, Right refers to East
+	* Click the Extract button; wait for the data to be collected. 
+	* A dialog will open asking if you want to download the extracted data file; click yes.
+	* Select a location on your computer to store the data (choose the folder where your mapping scripts are located).
+	* Choose to rename the file: gravity_data_123W-121W_41N-43N.csv
+
+
+2) You will now prepare your new data file for processing.
+
+	* Open you data file (gravity_data_123W-121W_41N-43N.csv) in a text editor (gedit).
+	* Edit your data file so that the first line begins with a # sign; then save your file. 
+
+This first row is the header row; the remaining of rows are data rows. The # sign indicates to PERL that this first line contains no data (numbers), only text. You can additionally open this file with a spreadsheet program (LibreOffice calc) if you like to look at the data in rows and columns. But the plotting scripts will need to use the edited .csv file. 
+
+
+3) You will now run a PERL script to extract 4 columns of data from the gravity_data_123W-121W_41N-43N.csv file: the longitude, the latitude, and the complete bouguer anomaly, and the elevation. This script will create a new file containing the extracted data named: gravity_data_123W-121W_41N-43N.csv.parse.ll
+
+	* On the command line, use the command:  perl extract_cols.pl gravity_data_123W-121W_41N-43N.csv
+
+
+4) You will now run a PERL script to create a kml file containing all of the data locations. This file will allow you to plot your data locations in Google earth. Make sure that you have the image file, icon47.png in your directory. This new file will be named: gravity_data_123W-121W_41N-43N.csv.parse.ll.kml
+
+	* On the command line, type the command:  perl make_kml.pl gravity_data_123W-121W_41N-43N.csv.parse.ll
+	* Open the file, gravity_data_123W-121W_41N-43N.csv.parse.ll.kml, in Google earth.
+
+5) You will now make a histogram of the complete bouguer anomaly values(units=mGal). First you will need the minimum and maximum values of your data and the total number of data values.
+
+	* On the command line run: gmtinfo gravity_data_123W-121W_41N-43N.csv.parse.ll
+
+The following output will be displayed on your screen (see below). This output gives you the total count and the min and max values in each column of your data. Notice the sets of values displayed between the <> marks. The 3rd column contains the bouguer anomaly values in mGals.
+
+gravity_data_123W-121W_41N-43N.csv.parse.ll: N = 5955 <-123.0009969/-121.0010884> <41.0000549/42.99986> <-182.88/-62.97> <297.65/4020.97>
+
+	* Open the script, histogram.pl, for editing (gedit). Edit the section labeled "#EDIT these VALUES to FIT your DATA", by changing the zero  values for $min, $max, $count to the min, max, and total number of bouguer anomaly values for your data. Save your changes.
+
+	* On the command line run: perl histogram.pl gravity_data_123W-121W_41N-43N.csv.parse.ll
+	  The following information will be printed to your screen:
+
+pshistogram: Processing input table data
+pshistogram: 5955 points read
+pshistogram: Extreme values of the data :	-182.88	-62.97
+pshistogram: Locations: L2, L1, LMS; Scales: L2, L1, LMS	-139.615939547-145.53	-152.12	23.0801657503	19.674102	16.175166
+pshistogram: min/max values are :	-182.88	-62.97	0	1405
+pshistogram: Area under histogram is 59550
+
+	* View the output file: gravity_data_123W-121W_41N-43N.csv.parse.ll.histogram.png
+
+To make a nicer looking histogram, edit the histogram.pl script and change the $count value to be the last value after: "min/max values are :" Then, save your changes and rerun the histogram.pl script. This will make the y-column shorter and make a better-looking histogram plot. Notice the most common value in your data file displayed on the histogram plot. Again, view the output image file: gravity_data_123W-121W_41N-43N.csv.parse.ll.histogram.png
+ 
+
+6) You will now make a contour make a contour plot of the gravity anomaly including a color image, contour lines, and scale bar. This new file will be called: gravity_data_123W-121W_41N-43N.csv.parse.ll.png
+
+	* On the command line run: perl plot_anomaly.gmt.pl gravity_data_123W-121W_41N-43N.csv.parse.ll
+	* View the output image file: gravity_data_123W-121W_41N-43N.csv.parse.ll.png
+
+7) You will now view the gravity anomaly in Google earth. 
+	
+	* Open the file, overlay.kml, for editing (gedit). You need to change the zero values for north, south, east, and west to reflect the extents of your contour map. The map extents are embedded in the file names. The values should be in degrees. Since the longitude is specified as degrees West, these values should be negative.
+
+	* Now, open the file: overlay.kml in Google Earth 
+If you right-click on the png file name (Under Places in Google Earth) and then click on Properties, you will be able to adjust the transparency of the overlay image.
+	
+ 
+Useful information:     
+	PERL scripts have a file extension of .pl
+	image files have an extension of .png
+	Google earth files have an extension of .kml
+	.csv files are text files with data columns separated by commas (csv = comma separated values)
+	Use gedit as your text editor as it will color code your scripts and make them easier to read and edit

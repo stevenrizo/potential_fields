@@ -1,0 +1,11 @@
+# GMT 5 Session common arguments shelf
+BEGIN GMT 5.1.0
+B	200:Magnetic Anomaly:/:nT:
+J	m
+Jm	m1:5000000
+JX	X4i
+R	-123.5/-121.5/47/49
+X	1i
+Y	1i
+L	1
+END
